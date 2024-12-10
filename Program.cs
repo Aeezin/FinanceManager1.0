@@ -1,13 +1,15 @@
-﻿namespace FinanceManagerV5;
+﻿using Npgsql;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string connectionString = DatabaseConnection.GetConnectionString();
+
         bool loginMenuRunning = true;
         bool transactionMenuRunning = true;
 
-        string userChoice = Console.ReadLine();
+        string userChoice = Console.ReadLine()!;
 
         while (loginMenuRunning)
         {
@@ -53,11 +55,12 @@ class Program
 
                     break;
                 case "6":
-                    
+                
                     transactionMenuRunning = false;
                     break;
                 default:
                     Console.WriteLine("Invalid input. Please try again.");
+                    break;
             }
         }
     }
