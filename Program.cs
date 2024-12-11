@@ -7,26 +7,35 @@ class Program
         bool loginMenuRunning = true;
         bool transactionMenu = true;
 
-        string? userChoice = Console.ReadLine();
+        string userChoice;
 
         while (loginMenuRunning)
         {
+            LoginMenu.Execute();
+
+            userChoice = Console.ReadLine()!;
+
             switch (userChoice)
             {
                 case "1":
-
+                    Account.CreateAccount();
                     break;
                 case "2":
 
                     break;
                 case "3":
                     loginMenuRunning = false;
+                    transactionMenu = false;
                     break;
             }
         }
 
         while (transactionMenu)
         {
+            TransactionMenu.Execute();
+
+            userChoice = Console.ReadLine()!;
+
             switch (userChoice)
             {
                 case "1":
@@ -45,7 +54,7 @@ class Program
 
                     break;
                 case "6":
-                
+                    transactionMenu = false;
                     break;
             }
         }
