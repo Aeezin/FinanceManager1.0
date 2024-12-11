@@ -7,16 +7,24 @@ class Program
 
     static void Main(string[] args)
     {
+<<<<<<< HEAD
         Console.Clear();
         bool loginMenuRunning = true;
         bool transactionMenuRunning = false;
 
         string userChoice;
+=======
+        bool loginMenuRunning = true;
+        bool transactionMenuRunning = true;
+
+        string userChoice = Console.ReadLine();
+>>>>>>> 449228e3d9196ac3386390ed965383b997a1779d
 
         while (loginMenuRunning)
         {
             LoginMenu.Execute();
 
+<<<<<<< HEAD
             userChoice = Console.ReadLine()!;
 
             switch (userChoice)
@@ -35,6 +43,22 @@ class Program
                     break;
                 case "3":
                     loginMenuRunning = false;
+=======
+            switch (userChoice)
+            {
+                case "1":
+                    // Logga in
+                    break;
+                case "2":
+                    // Skapa account
+                    break;
+                case "3":
+                    loginMenuRunning = false;
+                    transactionMenuRunning = false;
+                    break;
+                default:
+                    Console.WriteLine("Invalid input. Please try again.");
+>>>>>>> 449228e3d9196ac3386390ed965383b997a1779d
                     break;
             }
         }
@@ -43,8 +67,11 @@ class Program
         {
             TransactionMenu.Execute();
 
+<<<<<<< HEAD
             userChoice = Console.ReadLine()!;
 
+=======
+>>>>>>> 449228e3d9196ac3386390ed965383b997a1779d
             switch (userChoice)
             {
                 case "1":
@@ -63,8 +90,16 @@ class Program
 
                     break;
                 case "6":
+<<<<<<< HEAD
                     transactionMenuRunning = false;
                     break;
+=======
+                    
+                    transactionMenuRunning = false;
+                    break;
+                default:
+                    Console.WriteLine("Invalid input. Please try again.");
+>>>>>>> 449228e3d9196ac3386390ed965383b997a1779d
             }
         }
     }
