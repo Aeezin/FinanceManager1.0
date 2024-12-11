@@ -1,31 +1,31 @@
-using System.Security.Cryptography.X509Certificates;
-using Npgsql;
-
 public class Account
 {
-    public static string username;
-    public static string password;
+    public static string createUsername = "";
+    public static string createPassword = "";
 
     public static void CreateAccount()
     {
         Console.Write("Username: ");
-        username = Console.ReadLine()!;
+        createUsername = Console.ReadLine()!;
         Console.Write("Password: ");
-        password = Console.ReadLine()!;
+        createPassword = Console.ReadLine()!;
     }
 
-    public static void Login()
+
+    public static bool Login()
     {
         Console.Write("Username: ");
         string loginUsername = Console.ReadLine()!;
         Console.Write("Password: ");
         string loginPassword = Console.ReadLine()!;
 
-        if (!loginUsername.Equals(username) && loginPassword.Equals(password))
+        if (!loginUsername.Equals(createUsername) || !loginPassword.Equals(createPassword))
         {
             Console.WriteLine("Failed to login.");
+            Console.ReadKey();
+            return false;
         }
+        Console.WriteLine("Succesfully logged in.");
+        return true;
     }
-
-    public static void Logout() { }
 }
