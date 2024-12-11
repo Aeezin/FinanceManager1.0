@@ -2,10 +2,14 @@
 
 class Program
 {
+    private static string username = "";
+    private static string password = "";
+
     static void Main(string[] args)
     {
+        Console.Clear();
         bool loginMenuRunning = true;
-        bool transactionMenu = true;
+        bool transactionMenuRunning = false;
 
         string userChoice;
 
@@ -18,19 +22,24 @@ class Program
             switch (userChoice)
             {
                 case "1":
+                    Console.Clear();
                     Account.CreateAccount();
                     break;
                 case "2":
-
+                    Console.Clear();
+                    Account.Login();
+                    if (Account.Login().Equals(true))
+                    {
+                        transactionMenuRunning = true;
+                    }
                     break;
                 case "3":
                     loginMenuRunning = false;
-                    transactionMenu = false;
                     break;
             }
         }
 
-        while (transactionMenu)
+        while (transactionMenuRunning)
         {
             TransactionMenu.Execute();
 
@@ -54,7 +63,7 @@ class Program
 
                     break;
                 case "6":
-                    transactionMenu = false;
+                    transactionMenuRunning = false;
                     break;
             }
         }

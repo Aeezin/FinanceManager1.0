@@ -1,12 +1,11 @@
+using System.Security.Cryptography;
+
 public class SaltGenerating
 {
     public static string SaltPassword()
     {
         byte[] saltArray = new byte[16];
-        using (var random = new System.Security.Cryptography.RNGCryptoServiceProvider())
-        {
-            random.GetBytes(saltArray);
-        }
+        RandomNumberGenerator.Fill(saltArray);
         return Convert.ToBase64String(saltArray);
     }
 
