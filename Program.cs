@@ -5,6 +5,7 @@ class Program
     static void Main(string[] args)
     {
         string connectionString = DatabaseConnection.GetConnectionString();
+        using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
 
         bool loginMenuRunning = true;
         bool transactionMenuRunning = true;
@@ -13,6 +14,7 @@ class Program
 
         while (loginMenuRunning)
         {
+            connection.Open();
             LoginMenu.Execute();
 
             switch (userChoice)
@@ -31,10 +33,12 @@ class Program
                     Console.WriteLine("Invalid input. Please try again.");
                     break;
             }
+            connection.Close();
         }
 
         while (transactionMenuRunning)
         {
+            connection.Open();
             TransactionMenu.Execute();
 
             switch (userChoice)
@@ -55,7 +59,7 @@ class Program
 
                     break;
                 case "6":
-                
+
                     transactionMenuRunning = false;
                     break;
                 default:

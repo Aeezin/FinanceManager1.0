@@ -9,7 +9,7 @@ public class TransactionMenu
         Console.WriteLine("3. Show Balance");
         Console.WriteLine("4. Show Income by Period");
         Console.WriteLine("5. Show Expenses by Period");
-        Console.WriteLine("6. Save and log out");
+        Console.WriteLine("6. Log out");
         Console.Write("Please choose an option: ");
     }
 }
