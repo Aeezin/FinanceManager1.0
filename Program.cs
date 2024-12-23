@@ -1,13 +1,16 @@
-﻿class Program
-{
-    private static string username = "";
-    private static string password = "";
+﻿using Npgsql;
 
+class Program
+{
     static async Task Main(string[] args)
+
     {
-        AccountManager.CreateTables();
+        string connectionString = DatabaseConnection.GetConnectionString();
+        using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
 
         Console.Clear();
         await MenuManager.MainMenu();
+
+        
     }
 }
