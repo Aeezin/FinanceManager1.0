@@ -3,17 +3,14 @@ public class MenuManager
     public static bool loginMenuRunning = true;
     public static bool transactionMenuRunning = false;
     public static string userChoice = "";
-    public static async Task LoginMenu()
+    public static async Task MainMenu()
     {
 
         while (loginMenuRunning)
         {
+
             Console.Clear();
-            Console.WriteLine("Finance Manager");
-            Console.WriteLine("1. Create account");
-            Console.WriteLine("2. Login");
-            Console.WriteLine("3. Exit");
-            Console.Write("Please choose an option: ");
+            LoginMenu.Execute();
 
             userChoice = Console.ReadLine()!;
 
@@ -71,7 +68,7 @@ public class MenuManager
                 case "6":
                     transactionMenuRunning = false;
                     loginMenuRunning = true;
-                    await LoginMenu();
+                    await MainMenu();
                     break;
             }
         }

@@ -13,7 +13,6 @@ public class AccountManager
 
         NpgsqlCommand cmd = new(
             @"
-            BEGIN;
             CREATE TABLE IF NOT EXISTS accounts (
             account_id SERIAL PRIMARY KEY,
             account_name VARCHAR(50) UNIQUE NOT NULL,
@@ -26,7 +25,6 @@ public class AccountManager
             amount DECIMAL (10, 2) NOT NULL,
             description TEXT,
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            COMMIT;
             );", connection);
         
         cmd.ExecuteNonQuery();
@@ -35,31 +33,67 @@ public class AccountManager
 
     public static async Task CreateAccount()
     {   
-        Console.Write("Username: ");
-        string username = Console.ReadLine()!;
-        Console.Write("Password: ");
-        string password = Console.ReadLine()!;
+        try
+        {
+            await using var connection = new NpgsqlConnection(
+                DatabaseConnection.GetConnectionString()
+            );
+            await connection.OpenAsync();
 
-        await using var connection = new NpgsqlConnection(
-            DatabaseConnection.GetConnectionString()
-        );
-        await connection.OpenAsync();
+            Console.Write("Username: ");
+            string? username = Console.ReadLine();
 
-        NpgsqlCommand cmd = new(
-            @"
-            BEGIN;
-            INSERT INTO accounts(account_name, password) (
-            VALUES(
-            @account_name,
-            @password)
-            COMMIT;
-            );", connection);
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                Console.WriteLine("Username cannot be empty, please try again.");
+                Console.ReadKey();
+                return;
+            }
 
-        cmd.Parameters.AddWithValue("account_name", $"{username}");
-        cmd.Parameters.AddWithValue("password", $"{password}");
+            NpgsqlCommand checkAccountName = new(
+                @"SELECT COUNT(*) FROM accounts WHERE account_name = @account_name", connection);
+            
+            checkAccountName.Parameters.AddWithValue("account_name", $"{username}");
 
-        await cmd.ExecuteNonQueryAsync();
-        await connection.CloseAsync();
+            long count = (long)(await checkAccountName.ExecuteScalarAsync() ?? 0);
+            if (count > 0)
+            {
+                Console.WriteLine("This account does already exist. Please try different name.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.Write("Password: ");
+            string? password = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                Console.WriteLine("Password cannot be empty. Please try again.");
+                Console.ReadKey();
+                return;
+            }
+
+
+            NpgsqlCommand cmd = new(
+                @"
+                INSERT INTO accounts(account_name, password)
+                VALUES(@account_name, @password);", connection);
+
+            cmd.Parameters.AddWithValue("account_name", $"{username}");
+            cmd.Parameters.AddWithValue("password", $"{password}");
+
+            await cmd.ExecuteNonQueryAsync();
+
+            Console.WriteLine("Account created.");
+            Console.ReadKey();
+
+            await connection.CloseAsync();
+        }
+        catch (Exception exeption)
+        {
+            Console.WriteLine($"An error occurred: {exeption.Message}");
+            Console.ReadKey();
+        }
     }
 
     public static async Task Login()
@@ -92,7 +126,7 @@ public class AccountManager
             }
             if (!account_name.Equals(username) || !password.Equals(userPassword))
             {
-                Console.WriteLine("Wrong login, try again.");
+                Console.WriteLine("Wrong account or password, please try again.");
                 Console.ReadKey();
                 return;
             }
