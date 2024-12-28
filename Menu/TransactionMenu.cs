@@ -1,4 +1,4 @@
-public class TransactionMenu
+public class MainTransactionMenu
 {
     public static void Execute()
     {

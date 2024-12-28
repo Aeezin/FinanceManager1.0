@@ -132,6 +132,7 @@ public class AccountManager
             }
             Console.WriteLine("Successfully logged in.");
             Console.ReadKey();
+            
             MenuManager.loginMenuRunning = false;
             MenuManager.transactionMenuRunning = true;
             await connection.CloseAsync();
