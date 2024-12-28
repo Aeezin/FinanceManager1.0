@@ -16,7 +16,7 @@ public class AccountManager
             CREATE TABLE IF NOT EXISTS accounts (
             account_id SERIAL PRIMARY KEY,
             account_name VARCHAR(50) UNIQUE NOT NULL,
-            password VARCHAR(50) NOT NULL
+            passwordhash VARCHAR(255) NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS transactions (
@@ -26,18 +26,16 @@ public class AccountManager
             description TEXT,
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );", connection);
-        
+
         cmd.ExecuteNonQuery();
         connection.Close();
     }
 
     public static async Task CreateAccount()
-    {   
+    {
         try
         {
-            await using var connection = new NpgsqlConnection(
-                DatabaseConnection.GetConnectionString()
-            );
+            await using var connection = new NpgsqlConnection(DatabaseConnection.GetConnectionString());
             await connection.OpenAsync();
 
             Console.Write("Username: ");
@@ -52,7 +50,7 @@ public class AccountManager
 
             NpgsqlCommand checkAccountName = new(
                 @"SELECT COUNT(*) FROM accounts WHERE account_name = @account_name", connection);
-            
+
             checkAccountName.Parameters.AddWithValue("account_name", $"{username}");
 
             long count = (long)(await checkAccountName.ExecuteScalarAsync() ?? 0);
@@ -73,14 +71,16 @@ public class AccountManager
                 return;
             }
 
+            string passwordSalt = BCrypt.Net.BCrypt.GenerateSalt(12);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password, passwordSalt);
 
             NpgsqlCommand cmd = new(
                 @"
-                INSERT INTO accounts(account_name, password)
-                VALUES(@account_name, @password);", connection);
+                INSERT INTO accounts(account_name, passwordhash)
+                VALUES(@account_name, @passwordhash);", connection);
 
             cmd.Parameters.AddWithValue("account_name", $"{username}");
-            cmd.Parameters.AddWithValue("password", $"{password}");
+            cmd.Parameters.AddWithValue("passwordhash", $"{passwordHash}");
 
             await cmd.ExecuteNonQueryAsync();
 
@@ -98,13 +98,35 @@ public class AccountManager
 
     public static async Task Login()
     {
-        string account_name = "";
         string password = "";
+        int accountId = -1;
 
         Console.Write("Username: ");
-        string username = Console.ReadLine()!;
+        string? username = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            Console.WriteLine("Wrong username. Try again!");
+            Console.ReadKey();
+            return;
+        }
+
         Console.Write("Password: ");
-        string userPassword = Console.ReadLine()!;
+        string? userPassword = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(userPassword))
+        {
+            Console.WriteLine("Wrong password. Try again!");
+            Console.ReadKey();
+            return;
+        }
+
+        if (!userPassword.Equals())
+        {
+            Console.WriteLine("Wrong password. Try again!");
+            Console.ReadKey();
+            return;
+        }
 
         NpgsqlConnection connection = new NpgsqlConnection(
             DatabaseConnection.GetConnectionString()
@@ -113,29 +135,37 @@ public class AccountManager
 
         NpgsqlCommand cmd = new(
             @"
-            SELECT account_name, password FROM accounts
+            SELECT account_id, passwordhash FROM accounts
             WHERE account_name = @account_name;", connection);
 
-            cmd.Parameters.AddWithValue("account_name", $"{username}");
+        cmd.Parameters.AddWithValue("account_name", $"{username}");
 
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                account_name = reader.GetString(0);
-                password = reader.GetString(1);
-            }
-            if (!account_name.Equals(username) || !password.Equals(userPassword))
-            {
-                Console.WriteLine("Wrong account or password, please try again.");
-                Console.ReadKey();
-                return;
-            }
-            Console.WriteLine("Successfully logged in.");
-            Console.ReadKey();
-            
-            MenuManager.loginMenuRunning = false;
-            MenuManager.transactionMenuRunning = true;
-            await connection.CloseAsync();
-            await MenuManager.TransactionMenu();
+
+        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            accountId = reader.GetInt32(0);
+            password = reader.GetString(1);
+        }
+        // if (accountId == -1 || !password.Equals(userPassword))
+        // {
+        //     Console.WriteLine("Wrong account or password, please try again.");
+        //     Console.ReadKey();
+        //     return;
+        // }
+
+        if (!BCrypt.Net.BCrypt.Verify(userPassword, password))
+        {
+            Console.WriteLine("Wrong account or password, please try again.");
+            return;
+        }
+
+        Console.WriteLine("Successfully logged in.");
+        Console.ReadKey();
+
+        MenuManager.loginMenuRunning = false;
+        MenuManager.transactionMenuRunning = true;
+        await connection.CloseAsync();
+        await MenuManager.TransactionChoice();
     }
 }
